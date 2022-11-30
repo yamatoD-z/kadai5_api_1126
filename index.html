@@ -193,7 +193,7 @@
     for (let i = 0; i < event.results.length; ++i) {
       //認識の最終結果
       if (event.results[i].isFinal) {
-        final += event.results[i][0].transcript;
+        final = event.results[i][0].transcript;
       } 
       //認識の途上
       else {
@@ -242,7 +242,7 @@
 
 // 。の自動追加 --------------------------------------------------------------------
 document.getElementById("preparation").onclick = function () {
-console.log(final);
+  console.log(final);
 
 
 }
