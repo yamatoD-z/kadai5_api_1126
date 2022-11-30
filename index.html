@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>翻訳ツール</title>
+</head>
+
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600&display=swap");
+
+* {
+  font-family: "Baloo 2", cursive;
+  list-style: none;
+  text-decoration: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 12px;
+}
+
+#title {
+  background-color: #00081a;
+  color: #fff;
+  padding: 5px 0 5px 10px;
+  font-size: 3rem;
+}
+#main {
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#auth-key {
+  width: 50rem;
+  font-size: 1.4rem;
+  margin-bottom: 3rem;
+  padding: 2rem 1rem;
+}
+
+#source, #final_span {
+  width: 50rem;
+  font-size: 1.4rem;
+  margin-bottom: 3rem;
+  padding: 2rem 1rem;
+}
+#translate, #translateVoice, #speak {
+  width: 50rem;
+  height: 6rem;
+  font-size: 2rem;
+  background-color: #00081a;
+  color: #fff;
+  line-height: 6rem;
+  border-radius: 3px;
+  text-align: center;
+  margin-bottom: 3rem;
+  cursor: pointer;
+}
+
+/* #translateVoiceEN:active, #speak:active {
+  color: #00081a;
+  background-color: #fff;
+  border: 1px solid #00081a;
+} */
+
+#result, #resultVoice {
+  width: 50rem;
+  font-size: 1.4rem;
+  padding: 2rem 1rem;
+}
+
+.button {
+  width: 190px;
+  height: 40px;  
+  font-size: 1.4rem;
+}
+
+.button:active{
+  background-color: aqua;
+}
+
+</style>
+
+<body>
+  <h1 id="title">音声認識→Deepl翻訳→文字読み上げ</h1>
+  <br>
+  <h2 style='font-size:2rem'>①音声認識（Startボタンを押して開始。入力も可。）ただし、句読点を手補正する必要がある。</h2>
+
+  
+  <br>
+  <button class="button" onclick="recognitionStart()">Start</button>
+  <button class="button" onclick="recognitionStop()">stop</button>
+  <span id="status" style="font-size:1.4rem"></span>
+  <br>
+  <textarea id="final_span" cols="100" rows="5" placeholder="音声がテキストに変換されて表示されます（日本語、英語いずれも可）" ></textarea>
+  <br>
+  ↓このあたりに音声認識経過が出ます（スマホだと出ない）
+  <span id="interim_span" style="color:grey"></span>  
+  
+  <br>
+  <span id="recognizedDetail" style="color:grey"></span>
+  <br>
+  <h2 style='font-size:2rem'>②句読点など、手補正</h2>
+  <button id="preparation" class="button">。の自動追加</button>
+  <br>    
+  <br>
+  <h2 style='font-size:2rem'>③DeepL翻訳（上段の言語に応じて、英訳か和約を選択。）</h2>
+  <button id="translateVoiceEN" class="button">英訳</button>
+  <button id="translateVoiceJP" class="button">和訳</button>
+  <br>
+  <textarea id="resultDeepl" cols="100" rows="15" placeholder="変換後のテキストを表示。上記で句読点が抜けているとうまく英訳されない"></textarea>
+  <br>
+
+  
+  <h2 style='font-size:2rem'>④読み上げる　音声合成 (Text To Speech : TTS)</h2>
+  <form id="form_tts">
+    <p></p>
+    <div>
+      <label for="rate_tts" style="font-size: 1.2rem;">再生速度</label> 
+      <input id="rate_tts" style="font-size: 1.2rem;" type="range" min="0.5" max="2" value="1" step="0.1">&nbsp;&nbsp;<span id="rate-value-tts">1</span>
+    </div>
+    <div>
+      <label for="pitch_tts" style="font-size: 1.2rem;">ピッチ(音高)</label> 
+      <input id="pitch_tts" style="font-size: 1.2rem;" type="range" min="0" max="2" value="1" step="0.1">&nbsp;&nbsp;<span id="pitch-value-tts">1</span>
+    </div>
+    <select id="select_tts"  style="font-size: 1.2rem;">
+    </select>
+    <p></p>
+    <button id="play" type="submit" class="button">再生する</button>
+    
+  </form>
+
+  <form id="form_tts_angry">
+    <button id="playAngry" type="submit" class="button">怒っている雰囲気</button>
+  </form>
+<!-- 
+  <br>
+  <form id="pauseresume">
+    <button id="pauseresumebtn" type="submit" class="button">一時停止&再開</button>
+  </form> -->
+
+  <br>
+
+  <form id="pause">
+    <button id="pausebtn" type="submit" class="button">一時停止</button>
+  </form>
+
+  <form id="resume">
+    <button id="resumebtn" type="submit" class="button">再開</button>
+  </form>
+
+  <br>
+
+  <form id="stop">
+    <button id="stopbtn" type="submit" class="button">停止</button>
+  </form>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>  
+<script type="text/javascript" src="js/apikey.js"></script>
+<script type="text/javascript">
+// 音声認識関連 --------------------------------------------------------------------
+// https://zenn.dev/tomioka/articles/47af891c679ca3
+
+  let recognizing; 
+  const recognition = new webkitSpeechRecognition();
+  // recognition.lang = "ja-JP"; 英語で話せば、英語と認識したので、設定は外す
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 10;
+  reset();
+  recognition.onend = reset;
+
+  recognition.onsoundstart = function(){
+    document.getElementById('status').innerHTML = "認識中";
+  };
+  recognition.onnomatch = function(){
+    document.getElementById('status').innerHTML = "もう一度試してください";
+  };
+  recognition.onerror= function(){
+    document.getElementById('status').innerHTML = "エラー";
+  };
+  recognition.onsoundend = function(){
+    document.getElementById('status').innerHTML = "停止中";
+  };
+
+  recognition.onresult = (event) => {
+    let final = "";
+    let interim = "";
+    for (let i = 0; i < event.results.length; ++i) {
+      //認識の最終結果
+      if (event.results[i].isFinal) {
+        final += event.results[i][0].transcript;
+      } 
+      //認識の途上
+      else {
+        interim +=  "[途中経過] " + event.results[i][0].transcript;
+      }
+    }
+    console.log(final);
+    console.log(interim);
+    final_span.value = final;
+    interim_span.innerHTML = interim
+
+
+    
+   //トップ10の認識仮説の表示
+  //  https://kesin.hatenablog.com/entry/2013/08/27/Web%E3%82%A2%E3%83%97%E3%83%AA%E3%81%AB%E9%AB%98%E6%A9%9F%E8%83%BD%E3%81%AA%E9%9F%B3%E5%A3%B0%E8%AA%8D%E8%AD%98%E3%82%92%E8%BF%BD%E5%8A%A0%E3%81%99%E3%82%8BWeb_Speech_API
+    $("#recognizedDetail").empty();
+    for (let i = 0; i<event.results.length; i++){
+        if(event.results[i].isFinal){
+            for (let j = 0; j<recognition.maxAlternatives; j++){
+                $("#recognizedDetail").append(
+                  `<p>
+                    ランク${j} ${event.results[i][j].transcript}:${event.results[i][j].confidence}
+                    </p><br>`);
+            }
+          }
+        }
+
+
+  }
+
+  function reset() {
+    recognizing = false;
+  }
+
+  function recognitionStart() {
+      recognition.start();
+      recognizing = true;
+      final_span.value = "";
+      interim_span.value = "";
+    }
+
+  function recognitionStop() {
+      recognition.stop();
+      reset();
+  }
+
+// 。の自動追加 --------------------------------------------------------------------
+document.getElementById("preparation").onclick = function () {
+console.log(final);
+
+
+}
+
+// Deepl翻訳関連 --------------------------------------------------------------------
+
+  const url = "https://api-free.deepl.com/v2/translate";
+
+  document.getElementById("translateVoiceEN").onclick = function () {
+    let xhr = new XMLHttpRequest();
+    let authKey = config.apikey;
+    let text = document.getElementById("final_span").value;
+    let targetLang = "EN";
+    let data =
+      "auth_key=" + authKey + "&text=" + text + "&target_lang=" + targetLang;
+    xhr.open("POST", url);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        document.getElementById("resultDeepl").value = JSON.parse(
+          xhr.response
+        ).translations[0]["text"];
+      }
+    };
+    xhr.send(data);
+
+  };
+
+  document.getElementById("translateVoiceJP").onclick = function () {
+    let xhr = new XMLHttpRequest();
+    let authKey = config.apikey;
+    let text = document.getElementById("final_span").value;
+    let targetLang = "JA";
+    let data =
+      "auth_key=" + authKey + "&text=" + text + "&target_lang=" + targetLang;
+    xhr.open("POST", url);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        document.getElementById("resultDeepl").value = JSON.parse(
+          xhr.response
+        ).translations[0]["text"];
+      }
+    };
+    xhr.send(data);
+  };
+
+
+// 読み上げ関連 --------------------------------------------------------------------
+// https://www.petitmonte.com/javascript/web-speech-api.html
+let synth = window.speechSynthesis;
+ 
+if (synth){
+  let form_tts   = document.getElementById('form_tts');
+  let resultDeepl    = document.getElementById('resultDeepl');
+  let select_tts = document.getElementById('select_tts');
+  let pitch_tts  = document.getElementById('pitch_tts');
+  let rate_tts   = document.getElementById('rate_tts');
+ 
+  // 音声リスト
+  let voices = [];
+  function populateVoiceList() {
+    voices = synth.getVoices().sort(function (a, b) {
+        const aname = a.name.toUpperCase(), bname = b.name.toUpperCase();
+        if ( aname < bname ) return -1;
+        else if ( aname == bname ) return 0;
+        else return +1;
+    });
+    let selectedIndex = select_tts.selectedIndex < 0 ? 0 : select_tts.selectedIndex;
+    select_tts.innerHTML = '';
+    for(i = 0; i < voices.length ; i++) {
+      let option = document.createElement('option');
+      option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+      
+      // デフォルトにする
+      if(option.textContent.indexOf('en-US') != -1){
+        selectedIndex  = i;
+      }
+ 
+      option.setAttribute('data-lang', voices[i].lang);
+      option.setAttribute('data-name', voices[i].name);
+      select_tts.appendChild(option);
+    }
+    select_tts.selectedIndex = selectedIndex;
+  }
+  populateVoiceList();
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = populateVoiceList;
+  }
+    
+  // 再生
+  function speak(){
+
+    if (synth.speaking) {
+      console.log('再生をキャンセルしました。');
+      synth.cancel();
+    }
+      
+    if (resultDeepl.value !== '') {
+      let utterThis = new SpeechSynthesisUtterance(resultDeepl.value);
+        
+      utterThis.onstart  = function (event) {
+        console.log('再生を開始しました。');
+      }        
+      utterThis.onend = function (event) {
+        console.log('再生が終了しました。');
+      }
+      utterThis.onerror = function (event) {
+        alert('エラーが発生しました。')
+      }
+
+      let selectedOption = select_tts.selectedOptions[0].getAttribute('data-name');
+      for(i = 0; i < voices.length ; i++) {
+        if(voices[i].name === selectedOption) {
+          utterThis.voice = voices[i];
+          console.log(utterThis.voice)
+          break;
+        }
+      }
+      utterThis.pitch = pitch_tts.value;
+      utterThis.rate = rate_tts.value;
+      synth.speak(utterThis);
+    }
+  }
+
+// 再生(怒っている)
+function speakangry(){
+
+
+  if (synth.speaking) {
+    console.log('再生をキャンセルしました。');
+    synth.cancel();
+  }
+    
+  if (resultDeepl.value !== '') {
+    let utterThis = new SpeechSynthesisUtterance(resultDeepl.value);
+    
+    
+
+    utterThis.onstart  = function (event) {
+      console.log('再生を開始しました。');
+    }        
+    utterThis.onend = function (event) {
+      console.log('再生が終了しました。');
+    }
+    utterThis.onerror = function (event) {
+      alert('エラーが発生しました。')
+    }
+
+    let selectedOption = select_tts.selectedOptions[0].getAttribute('data-name');
+    for(i = 0; i < voices.length ; i++) {
+      if(voices[i].name === selectedOption) {
+        utterThis.voice = voices[i];
+        console.log(utterThis.voice)
+        break;
+      }
+    }
+    utterThis.pitch = 1.3;
+    utterThis.rate = 1.4;
+    synth.speak(utterThis);
+  }
+  }
+  
+  // 以下、イベント
+  form_tts.onsubmit = function(event) {
+    event.preventDefault();
+    speak();
+    // 15秒で突然止まる仕様。5秒ごとにpause&resumeを実行させると続く。
+    setInterval(()=>{
+      speechSynthesis.pause();    
+      speechSynthesis.resume();
+    }, 5000);
+    resultDeepl.blur();
+  }
+
+  form_tts_angry.onsubmit = function(event) {
+    event.preventDefault();
+    speakangry();
+    resultDeepl.blur();
+  }
+
+  pause.onsubmit = function(event) {
+    event.preventDefault();
+    speechSynthesis.pause();
+    resultDeepl.blur();
+  }
+
+  resume.onsubmit = function(event) {
+    event.preventDefault();
+    speechSynthesis.resume();
+    resultDeepl.blur();
+  }
+
+  stop.onsubmit = function(event) {
+    event.preventDefault();
+    speechSynthesis.stop();
+    resultDeepl.blur();
+  }
+
+  // pauseresume.onsubmit = function(event) {
+  //   event.preventDefault();
+  //   speechSynthesis.pause();    
+  //   speechSynthesis.resume();
+  //   resultDeepl.blur();
+  // }
+  
+  pitch_tts.onchange = function() {
+    document.getElementById('pitch-value-tts').innerHTML = pitch_tts.value;
+  }
+ 
+  rate_tts.onchange = function() {
+    document.getElementById('rate-value-tts').innerHTML = rate_tts.value;
+  }
+ 
+  select_tts.onchange = function(){
+    speak();
+  }
+}else{
+  alert('IE11には対応していません。\n※macOS/iOSのブラウザは未確認');
+}
+
+
+
+</script>
+
+</body>
+</html>
