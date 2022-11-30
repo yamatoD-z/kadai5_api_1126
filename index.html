@@ -193,7 +193,7 @@
     for (let i = 0; i < event.results.length; ++i) {
       //認識の最終結果
       if (event.results[i].isFinal) {
-        final += event.results[i].isFinal.transcript;
+        final += event.results[i][0].transcript;
       } 
       //認識の途上
       else {
@@ -263,6 +263,7 @@ document.getElementById("preparation").onclick = function () {
   adjusted = adjusted.replace(/した/g,'した。');
   adjusted = adjusted.replace(/だった/g,'だった。');
   adjusted = adjusted.replace(/ますね/g,'ますね。');
+  adjusted = adjusted.replace(/ませんか/g,'ませんか？');
 
   adjusted = adjusted.replace(/ます。が/g,'ますが、');
   adjusted = adjusted.replace(/です。が/g,'ですが、');
