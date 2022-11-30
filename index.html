@@ -95,13 +95,16 @@
   <br>
   <textarea id="final_span" cols="100" rows="5" placeholder="音声がテキストに変換されて表示されます（日本語、英語いずれも可）" ></textarea>
   <br>
-  ↓このあたりに音声認識経過が出ます（スマホだと出ない）
+  <span style="color: red;">  ↓このあたりに音声認識経過が出ます（スマホだと出ない）</span>
+  <br>
   <span id="interim_span" style="color:grey"></span>  
   
   <br>
+  <span style="color: red;">  ↓このあたりに変換候補のランクが出ます</span>
+  <br>
   <span id="recognizedDetail" style="color:grey"></span>
   <br>
-  <h2 style='font-size:2rem'>②句読点など、手補正</h2>
+  <h2 style='font-size:2rem'>②翻訳に向けて、句読点など、手補正</h2>
   <button id="preparation" class="button">。の自動追加</button>
   <br>    
   <br>
@@ -158,7 +161,7 @@
 
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>  
-<script type="text/javascript" src="js/apikey.js"></script>
+<script type="text/javascript" src="js/main.js"></script>
 <script type="text/javascript">
 // 音声認識関連 --------------------------------------------------------------------
 // https://zenn.dev/tomioka/articles/47af891c679ca3
@@ -243,7 +246,30 @@
 // 。の自動追加 --------------------------------------------------------------------
 document.getElementById("preparation").onclick = function () {
   console.log(final);
+  final.replace('ます','ます。');
+  final.replace('です','です。');
+  final.replace('ますよね','ますよね。');
+  final.replace('ですね','ですね。');
+  final.replace('ですよね','ですよね。');
+  final.replace('ました','ました。');
+  final.replace('である','である。');
+  final.replace('ましょう','ましょう。');  
+  final.replace('でしょう','でしょう。');
+  final.replace('ません','ません。');
+  final.replace('ください','ください。');
+  final.replace('でした','でした。');
+  final.replace('ますね','ますね。');
 
+  final.replace('ます。が','ますが、');
+  final.replace('です。が','ですが、');
+  final.replace('ました。が','ましたが、');
+  final.replace('である。が','であるが、');
+  final.replace('ません。が','ませんが、');
+  final.replace('でした。が','でしたが、');
+  final.replace('でしょう。が','でしょうが、');
+  final.replace('。。','。');
+  console.log(final);
+  final_span.value = final;
 
 }
 
