@@ -200,13 +200,17 @@
       } 
       //認識の途上
       else {
-        interim +=  "[途中経過] " + event.results[i][0].transcript;
+        $("#interim_span").append(
+                  `<p>
+                    [途中経過] ${event.results[i][0].transcript}
+                    </p><br>`);
+        // interim +=  "[途中経過] " + event.results[i][0].transcript;
       }
     }
     console.log(final);
     console.log(interim);
     final_span.value = final;
-    interim_span.innerHTML = interim
+    // interim_span.innerHTML = interim
 
 
     
