@@ -185,9 +185,11 @@
     document.getElementById('status').innerHTML = "停止中";
   };
 
+  let final = "";
+  let interim = "";
+
   recognition.onresult = (event) => {
-    let final = "";
-    let interim = "";
+  
     for (let i = 0; i < event.results.length; ++i) {
       //認識の最終結果
       if (event.results[i].isFinal) {
