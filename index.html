@@ -85,7 +85,7 @@
 <body>
   <h1 id="title">音声認識→Deepl翻訳→文字読み上げ</h1>
   <br>
-  <h2 style='font-size:2rem'>①音声認識（Startボタンを押して開始。入力も可。）ただし、句読点を手補正する必要がある。</h2>
+  <h2 style='font-size:2rem'>①音声認識（Startボタンを押して開始。入力も可。）</h2>
 
   
   <br>
@@ -93,16 +93,7 @@
   <button class="button" onclick="recognitionStop()">stop</button>
   <span id="status" style="font-size:1.4rem"></span>
   <br>
-  <textarea id="final_span" cols="100" rows="5" placeholder="音声がテキストに変換されて表示されます（日本語、英語いずれも可）" ></textarea>
-  <br>
-  <span style="color: red;">  ↓このあたりに音声認識経過が出ます（スマホだと出ない）</span>
-  <br>
-  <span id="interim_span" style="color:grey"></span>  
-  
-  <br>
-  <span style="color: red;">  ↓このあたりに変換候補のランクが出ます</span>
-  <br>
-  <span id="recognizedDetail" style="color:grey"></span>
+  <textarea id="final_span" cols="100" rows="5" placeholder="音声がテキストに変換されて表示されます（日本語、英語いずれも可）ただし、句読点は手補正する必要がある。" ></textarea>
   <br>
   <h2 style='font-size:2rem'>②翻訳に向けて、句読点など、手補正</h2>
   <button id="preparation" class="button">。の自動追加</button>
@@ -159,6 +150,17 @@
     <button id="stopbtn" type="submit" class="button">停止</button>
   </form>
 
+  
+  <span style="color: red;">  ↓このあたりに音声認識経過が出ます（スマホだと出ない）</span>
+  <br>
+  <span id="interim_span" style="color:grey"></span>  
+  
+  <br>
+  <br>
+  <span style="color: red;">  ↓このあたりに変換候補のランクが出ます</span>
+  <br>
+  <span id="recognizedDetail" style="color:grey"></span>
+  <br>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>  
 <script type="text/javascript" src="js/main.js"></script>
