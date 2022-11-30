@@ -249,31 +249,40 @@
 
 // 。の自動追加 --------------------------------------------------------------------
 document.getElementById("preparation").onclick = function () {
+  
+  // final = '一方、対外的には強硬な面も目立った９６年３月の台湾初の総統直接選挙を前に、中国軍が９５年７月から９６年３月にかけ、台湾上陸訓練や台湾沖への弾道ミサイル発射を繰り返し、台湾独立の動きをけん制した江氏は愛国主義教育も進め、「日本に対して歴史問題を永遠に言い続けなければならない」と主張。９８年の来日時には宮中晩さん会で歴史問題を持ち出し、日本国内の対中感情を悪化させるなど歴史問題での日中対立のきっかけを作った。引退後も党や軍に隠然とした影響力を保ち、後任の胡錦濤（フージンタオ）前政権への「院政」を敷いたとされ、習国家主席の政権発足には江氏の支援もあったとされる。習氏は自らの「１強体制」確立へ、汚職摘発を通じて江氏に連なる勢力の排除を進め、その影響力の低下を図ってきた。江氏が公の席に姿を見せたのは、１９年の建国７０年記念式典が最後だった';
   console.log(final);
-  final.replace('ます','ます。');
-  final.replace('です','です。');
-  final.replace('ますよね','ますよね。');
-  final.replace('ですね','ですね。');
-  final.replace('ですよね','ですよね。');
-  final.replace('ました','ました。');
-  final.replace('である','である。');
-  final.replace('ましょう','ましょう。');  
-  final.replace('でしょう','でしょう。');
-  final.replace('ません','ません。');
-  final.replace('ください','ください。');
-  final.replace('でした','でした。');
-  final.replace('ますね','ますね。');
+  let adjusted = final.replace(/ます/g,'ます。');
+  adjusted = adjusted.replace(/です/g,'です。');
+  adjusted = adjusted.replace(/ますよね/g,'ますよね。');
+  adjusted = adjusted.replace(/ですね/g,'ですね。');
+  adjusted = adjusted.replace(/ですよね/g,'ですよね。');
+  adjusted = adjusted.replace(/ました/g,'ました。');
+  adjusted = adjusted.replace(/である/g,'である。');
+  adjusted = adjusted.replace(/ましょう/g,'ましょう。');  
+  adjusted = adjusted.replace(/でしょう/g,'でしょう。');
+  adjusted = adjusted.replace(/ません/g,'ません。');
+  adjusted = adjusted.replace(/ください/g,'ください。');
+  adjusted = adjusted.replace(/した/g,'した。');
+  adjusted = adjusted.replace(/だった/g,'だった。');
+  adjusted = adjusted.replace(/ますね/g,'ますね。');
 
-  final.replace('ます。が','ますが、');
-  final.replace('です。が','ですが、');
-  final.replace('ました。が','ましたが、');
-  final.replace('である。が','であるが、');
-  final.replace('ません。が','ませんが、');
-  final.replace('でした。が','でしたが、');
-  final.replace('でしょう。が','でしょうが、');
-  final.replace('。。','。');
-  console.log(final);
-  final_span.value = final;
+  adjusted = adjusted.replace(/ます。が/g,'ますが、');
+  adjusted = adjusted.replace(/です。が/g,'ですが、');
+  adjusted = adjusted.replace(/ました。が/g,'ましたが、');
+  adjusted = adjusted.replace(/である。が/g,'であるが、');
+  adjusted = adjusted.replace(/ません。が/g,'ませんが、');
+  adjusted = adjusted.replace(/した。が/g,'したが、');
+  adjusted = adjusted.replace(/だった。が/g,'だったが、');
+  adjusted = adjusted.replace(/でしょう。が/g,'でしょうが、');
+  adjusted = adjusted.replace(/。。/g,'。');
+  console.log(adjusted);
+  final_span.value = adjusted;
+
+//   let fruitText = "applgrapeapplegrapeorange"
+// let text = fruitText.replace('apple', "りんご")
+// console.log(text)
+// final_span.value = text;
 
 }
 
